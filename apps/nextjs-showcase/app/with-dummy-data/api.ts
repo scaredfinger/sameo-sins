@@ -10,6 +10,9 @@ const ALL_CATEGORIES = [
   ['Category 3', 41],
   ['Category 4', 31],
   ['Category 5', 22],
+  ['Category 6', 27],
+  ['Category 7', 33],
+  ['Category 8', 37],
 ];
 
 export function loadCategories(): Future<Result<CategoryWithCardinality[], Error>> {

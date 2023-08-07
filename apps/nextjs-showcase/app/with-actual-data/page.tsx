@@ -1,7 +1,10 @@
 'use client'
 
-import { useEffect } from 'react';
-import _ from 'lodash';
+import { useEffect, useMemo } from 'react';
+
+import {
+  CardsByCategoriesWithProgressiveLoading,
+} from '@scaredfinger/cards-by-cats-vm';
 
 import { loadCardsByCategory, loadCategories } from './api';
 import { CardList } from '../../components/card-list';
@@ -14,7 +17,7 @@ interface Card {
 };
 
 export default function Index() {
-  const viewModel = useCardsByCategoriesState<Card, string>({
+  const viewState = useCardsByCategoriesState<Card, string>({
     loadCategories,
     loadCardsByCategory,
     numberOfCategoriesToPreload: 2,
@@ -24,10 +27,10 @@ export default function Index() {
   });
 
   useEffect(() => {
-    viewModel.preload();
+    viewState.preload();
   }, []);
 
   return (
-    <CardList viewModel={viewModel} styles={styles}/>
+    <CardList viewModel={viewState} styles={styles}/>
   );
 }

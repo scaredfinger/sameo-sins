@@ -14,6 +14,7 @@ export default async function Index() {
       <ul>
         <li>
           <Link href="/with-dummy-data">With dummy data</Link>
+          <Link href="/with-actual-data">With actual data</Link>
         </li>
       </ul>
     </div>
