@@ -17,7 +17,7 @@ interface Props<Card, Category> {
     [key: string]: string;
   }
   viewModel: CardsByCategoriesWithProgressiveLoading<Card, Category>;
-  renderCard?: (card: Card) => JSX.Element;
+  renderCard?: (card: Card, index: number) => JSX.Element;
 }
 
 export const CardList = <Card, Category>({
@@ -121,7 +121,7 @@ export const CardList = <Card, Category>({
               Done: (cardOrError) => (
                 <>
                   {cardOrError.match({
-                    Ok: (card) => sanitizedRenderCard(card),
+                    Ok: (card) => sanitizedRenderCard(card, i),
                     Error: (error) => (
                       <div className={`${styles.card} ${styles.error}`}>
                         {error.message}

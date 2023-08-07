@@ -1,0 +1,79 @@
+@import '../variables.scss';
+
+.cardsInCat {
+    // scroll: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.card {
+    width: 220px;
+    height: 340px;
+    border-radius: 10px;
+}   
+
+.cardsInCat .done {
+    background-color: $light_gray;
+}
+
+.cardsInCat .done:hover {
+    border: 2px solid $orange;
+}
+
+.cardsInCat .notAsked {
+    border: 2px dashed $dark_gray;
+    // background-color: $not_loaded;
+}
+
+.cardsInCat .loading {
+    background-color: $orange;
+}
+
+.cardsInCat .error {
+    background-color: $red;
+}
+
+.cardImageList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.cardImage {
+    margin: 0 auto;
+    height: 85px;
+    width: 85px;
+    object-fit: contain;
+}
+
+.cardImageList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.cardImage {
+    margin: 0 auto;
+    height: 85px;
+    width: 85px;
+    object-fit: contain;
+}
+
+.card h2 {
+    padding: 5px;
+    font-size: 20px;
+    line-height: 22px;
+    height: 75px;
+    color: $orange;
+    font-weight: bold;
+}
+
+.card p {
+    padding: 5px;
+    font-size: 10px;
+    line-height: 11px;
+    height: 60px;
+    color: $orange;
+}
