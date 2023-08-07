@@ -1,0 +1,47 @@
+{
+  "name": "cards-by-cats-vm",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/cards-by-cats-vm/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/cards-by-cats-vm",
+        "main": "libs/cards-by-cats-vm/src/index.ts",
+        "tsConfig": "libs/cards-by-cats-vm/tsconfig.lib.json",
+        "assets": ["libs/cards-by-cats-vm/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs cards-by-cats-vm {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/cards-by-cats-vm/**/*.ts",
+          "libs/cards-by-cats-vm/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/cards-by-cats-vm/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": []
+}
