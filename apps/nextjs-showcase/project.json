@@ -1,0 +1,54 @@
+{
+  "name": "nextjs-showcase",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/nextjs-showcase",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/nextjs-showcase"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/nextjs-showcase"
+        },
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "nextjs-showcase:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "nextjs-showcase:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "nextjs-showcase:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nx/next:export",
+      "options": {
+        "buildTarget": "nextjs-showcase:build:production"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/nextjs-showcase/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": []
+}
