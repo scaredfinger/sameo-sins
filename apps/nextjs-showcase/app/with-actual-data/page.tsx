@@ -1,10 +1,6 @@
-'use client'
+'use client';
 
-import { useEffect, useMemo } from 'react';
-
-import {
-  CardsByCategoriesWithProgressiveLoading,
-} from '@scaredfinger/cards-by-cats-vm';
+import { useEffect } from 'react';
 
 import { loadCardsByCategory, loadCategories } from './api';
 import { CardList } from '../../components/card-list';
@@ -13,8 +9,8 @@ import { useCardsByCategoriesState } from '../../components/use-cards-by-categor
 import styles from './page.module.scss';
 
 interface Card {
-  name: string
-};
+  name: string;
+}
 
 export default function Index() {
   const viewState = useCardsByCategoriesState<Card, string>({
@@ -30,7 +26,5 @@ export default function Index() {
     viewState.preload();
   }, []);
 
-  return (
-    <CardList viewModel={viewState} styles={styles}/>
-  );
+  return <CardList viewModel={viewState} styles={styles} />;
 }
