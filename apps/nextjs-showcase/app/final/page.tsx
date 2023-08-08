@@ -7,6 +7,7 @@ import { useCardsByCategoriesState } from '../../components/use-cards-by-categor
 import { CardList } from 'apps/nextjs-showcase/components/card-list';
 
 import styles from './page.module.scss';
+import Link from "next/link";
 
 export default function Index() {
   const viewState = useCardsByCategoriesState<Trip, string>({
@@ -22,11 +23,14 @@ export default function Index() {
     viewState.preload();
   }, []);
 
-  return <CardList 
+  return <>
+    <Link className="back" href="/">← Back</Link>
+    <CardList
     viewModel={viewState} 
     styles={styles} 
     renderCard={renderCards}
-  />;
+  />
+  </>;
 }
 
 function renderCards(card: Trip) {
