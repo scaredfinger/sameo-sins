@@ -13,6 +13,7 @@ import {
   State,
   SubmitChangesFunc,
 } from './cards-by-cats-vm';
+import exp from 'constants';
 
 describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () => {
   let pendingTasks: PendingTasks;
@@ -139,6 +140,35 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
         });
       });
     });
+
+    describe('on load categories error', () => {
+      beforeEach(async () => {
+        loadingCategories.signalError();
+        await untilNoMorePendingLoadCategories();
+      })
+
+      it('returns done', () => {
+        expect(sut.categories.isDone()).toBeTruthy();
+      })
+
+      it('returns done as error', () => {
+        sut.categories.map((categoriesOrError) => {
+          categoriesOrError.match({
+            Ok: () => expect(false).toBeTruthy(),
+            Error: (error) => expect(error).toBeTruthy()
+          })
+        })
+      })
+
+      it('returns done as error for cards', () => {
+        sut.cardsByCategory.map((cardsByCategoryOrError) => {
+          cardsByCategoryOrError.match({
+            Ok: () => expect(false).toBeTruthy(),
+            Error: (error) => expect(error).toBeTruthy()
+          })
+        })
+      })
+    })
 
     describe('on load cards by category done', () => {
       beforeEach(async () => {
