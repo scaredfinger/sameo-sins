@@ -13,11 +13,12 @@
 }   
 
 .cardsInCat .done {
-    background-color: $light_gray;
+    background-color: $gray;
+    border: 2px solid $gray;
 }
 
 .cardsInCat .done:hover {
-    border: 2px solid $orange;
+    border: 2px solid $cyan;
 }
 
 .cardsInCat .notAsked {
@@ -43,8 +44,10 @@
 .cardImage {
     margin: 0 auto;
     height: 85px;
-    width: 85px;
+    width: 90px;
     object-fit: contain;
+    border-radius: 5px;
+    background-color: $blue;
 }
 
 .cardImageList {
@@ -61,19 +64,20 @@
     object-fit: contain;
 }
 
-.card h2 {
+.card {
     padding: 5px;
+    color: $cyan;
+}
+
+.card h2 {
     font-size: 20px;
     line-height: 22px;
     height: 75px;
-    color: $orange;
     font-weight: bold;
 }
 
 .card p {
-    padding: 5px;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 11px;
     height: 60px;
-    color: $orange;
 }
