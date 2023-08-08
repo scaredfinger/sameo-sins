@@ -1,68 +1,70 @@
-import { AsyncData, Future, Result } from '@swan-io/boxed';
+import { AsyncData, Future, Result, Option } from '@swan-io/boxed'
 
-export type AsyncFunc<T = unknown> = () => Future<Result<T, Error>>;
+export type AsyncFunc<T = unknown> = () => Future<Result<T, Error>>
 
-export type WithCardinality<Category> = [Category, number];
+export type WithCardinality<Category> = [Category, number]
 
-export type SubmitChangesFunc<T> = (value: T) => T;
+export type SubmitChangesFunc<T> = (value: T) => T
 
 export interface CategoryWithCards<Category, Card> {
-  category: Category;
-  cards: Card[];
+  category: Category
+  cards: Card[]
 }
 
-export type AsyncResult<T> = AsyncData<Result<T, Error>>;
+export type AsyncResult<T> = AsyncData<Result<T, Error>>
 
 export function ok<T>(value: T): AsyncResult<T> {
-  return AsyncData.Done(Result.Ok(value));
+  return AsyncData.Done(Result.Ok(value))
 }
 
 export function fail<T>(error: Error): AsyncResult<T> {
-  return AsyncData.Done(Result.Error(error));
+  return AsyncData.Done(Result.Error(error))
 }
 
 export interface State<Card = never, Category = never> {
-  readonly categories: AsyncData<Result<WithCardinality<Category>[], Error>>;
+  readonly categories: AsyncData<Result<WithCardinality<Category>[], Error>>
   submitCategoryChanges(
     applyChanges: SubmitChangesFunc<
       AsyncData<Result<WithCardinality<Category>[], Error>>
     >
-  ): void;
+  ): void
 
-  readonly cardsByCategory: AsyncResult<Map<Category, AsyncResult<Card>[]>>;
+  readonly cardsByCategory: AsyncResult<
+    MonadicMap<Category, AsyncResult<Card>[]>
+  >
   submitCardsByCategoryChanges(
     applyChanges: SubmitChangesFunc<
-      AsyncResult<Map<Category, AsyncResult<Card>[]>>
+      AsyncResult<MonadicMap<Category, AsyncResult<Card>[]>>
     >
-  ): void;
+  ): void
 }
 
 interface CardsByCategoriesWithProgressiveLoadingOptions {
-  numberOfCategoriesToPreload?: number;
-  numberOfCardsToPreload?: number;
-  numberOfLoadMoreCategories?: number;
-  numberOfLoadMoreCards?: number;
+  numberOfCategoriesToPreload?: number
+  numberOfCardsToPreload?: number
+  numberOfLoadMoreCategories?: number
+  numberOfLoadMoreCards?: number
 }
 
 export class CardsByCategoriesWithProgressiveLoading<
   Card = never,
   Category = string
 > {
-  private numberOfCategoriesToPreload: number;
-  private numberOfCardsToPreload: number;
-  private numberOfLoadMoreCategories: number;
-  private numberOfLoadMoreCards: number;
+  private numberOfCategoriesToPreload: number
+  private numberOfCardsToPreload: number
+  private numberOfLoadMoreCategories: number
+  private numberOfLoadMoreCards: number
 
   public get categories(): AsyncData<
     Result<WithCardinality<Category>[], Error>
   > {
-    return this.state.categories;
+    return this.state.categories
   }
 
   public get cardsByCategory(): AsyncResult<
-    Map<Category, AsyncResult<Card>[]>
+    MonadicMap<Category, AsyncResult<Card>[]>
   > {
-    return this.state.cardsByCategory;
+    return this.state.cardsByCategory
   }
 
   constructor(
@@ -72,7 +74,7 @@ export class CardsByCategoriesWithProgressiveLoading<
       categories: Category[],
       offset: number,
       limit: number
-    ) => Future<Result<Map<Category, AsyncResult<Card>[]>, Error>>,
+    ) => Future<Result<MonadicMap<Category, AsyncResult<Card>[]>, Error>>,
     {
       numberOfCategoriesToPreload = 3,
       numberOfCardsToPreload = 5,
@@ -80,40 +82,40 @@ export class CardsByCategoriesWithProgressiveLoading<
       numberOfLoadMoreCards = 2,
     }: CardsByCategoriesWithProgressiveLoadingOptions = {}
   ) {
-    this.numberOfCategoriesToPreload = numberOfCategoriesToPreload;
-    this.numberOfCardsToPreload = numberOfCardsToPreload;
-    this.numberOfLoadMoreCategories = numberOfLoadMoreCategories;
-    this.numberOfLoadMoreCards = numberOfLoadMoreCards;
+    this.numberOfCategoriesToPreload = numberOfCategoriesToPreload
+    this.numberOfCardsToPreload = numberOfCardsToPreload
+    this.numberOfLoadMoreCategories = numberOfLoadMoreCategories
+    this.numberOfLoadMoreCards = numberOfLoadMoreCards
   }
 
   public preload() {
-    this.state.submitCategoryChanges(() => AsyncData.Loading());
-    this.state.submitCardsByCategoryChanges(() => AsyncData.Loading());
+    this.state.submitCategoryChanges(() => AsyncData.Loading())
+    this.state.submitCardsByCategoryChanges(() => AsyncData.Loading())
 
     this.loadCategories()
       .mapOk((categories) => {
-        this.state.submitCategoryChanges(() => ok(categories));
+        this.state.submitCategoryChanges(() => ok(categories))
 
-        const cardsByCategory = new Map<Category, AsyncResult<Card>[]>();
+        const cardsByCategory = new MonadicMap<Category, AsyncResult<Card>[]>()
         categories.forEach(([category, cardinality]) => {
           cardsByCategory.set(
             category,
             Array(cardinality).fill(AsyncData.NotAsked())
-          );
-        });
-        this.state.submitCardsByCategoryChanges(() => ok(cardsByCategory));
+          )
+        })
+        this.state.submitCardsByCategoryChanges(() => ok(cardsByCategory))
 
         this.loadCardsForCategoryRange({
           from: 0,
           to: this.numberOfCategoriesToPreload,
           categories,
           cardsByCategory,
-        });
+        })
       })
       .mapError((error) => {
-        this.state.submitCategoryChanges(() => fail(error));
-        this.state.submitCardsByCategoryChanges(() => fail(error));
-      });
+        this.state.submitCategoryChanges(() => fail(error))
+        this.state.submitCardsByCategoryChanges(() => fail(error))
+      })
   }
 
   private loadCardsForCategoryRange({
@@ -122,14 +124,14 @@ export class CardsByCategoriesWithProgressiveLoading<
     categories,
     cardsByCategory,
   }: {
-    from: number;
-    to: number;
-    categories: WithCardinality<Category>[];
-    cardsByCategory: Map<Category, AsyncResult<Card>[]>;
+    from: number
+    to: number
+    categories: WithCardinality<Category>[]
+    cardsByCategory: MonadicMap<Category, AsyncResult<Card>[]>
   }) {
-    const categoriesToLoad = categories.slice(from, to);
+    const categoriesToLoad = categories.slice(from, to)
 
-    this.loadCardsForSpecifiedCategories({ categoriesToLoad, cardsByCategory });
+    this.loadCardsForSpecifiedCategories({ categoriesToLoad, cardsByCategory })
   }
 
   private loadCardsForSpecifiedCategories({
@@ -138,12 +140,12 @@ export class CardsByCategoriesWithProgressiveLoading<
     limit = this.numberOfCardsToPreload,
     cardsByCategory,
   }: {
-    categoriesToLoad: WithCardinality<Category>[];
-    offset?: number;
-    limit?: number;
-    cardsByCategory: Map<Category, AsyncResult<Card>[]>;
+    categoriesToLoad: WithCardinality<Category>[]
+    offset?: number
+    limit?: number
+    cardsByCategory: MonadicMap<Category, AsyncResult<Card>[]>
   }) {
-    const loadingCardsLength = limit;
+    const loadingCardsLength = limit
 
     this.state.submitCardsByCategoryChanges((current) =>
       mergeValuesForLoading(
@@ -152,25 +154,20 @@ export class CardsByCategoriesWithProgressiveLoading<
         offset,
         loadingCardsLength
       )
-    );
+    )
 
     this.loadCardsByCategory(
       categoriesToLoad.map(([category]) => category),
       offset,
       limit
     ).mapOk((loadedCardsByCategory) => {
-      const from = offset;
-      const to = from + limit;
+      const from = offset
+      const to = from + limit
 
       this.state.submitCardsByCategoryChanges((current) => {
-        return mergeValuesWhenLoadDone(
-          current,
-          loadedCardsByCategory,
-          from,
-          to
-        );
-      });
-    });
+        return mergeValuesWhenLoadDone(current, loadedCardsByCategory, from, to)
+      })
+    })
   }
 
   public loadMoreCategories() {
@@ -178,13 +175,13 @@ export class CardsByCategoriesWithProgressiveLoading<
       this.cardsByCategory.mapOk((cardsByCategory) => {
         const countOfCategoriesWithAskedOrLoadedCards = Array.from(
           cardsByCategory.values()
-        ).filter((cards) => cards.some((card) => !card.isNotAsked())).length;
+        ).filter((cards) => cards.some((card) => !card.isNotAsked())).length
 
-        const from = countOfCategoriesWithAskedOrLoadedCards;
-        const to = from + this.numberOfLoadMoreCategories;
+        const from = countOfCategoriesWithAskedOrLoadedCards
+        const to = from + this.numberOfLoadMoreCategories
 
         if (to > categories.length) {
-          return;
+          return
         }
 
         this.loadCardsForCategoryRange({
@@ -192,89 +189,138 @@ export class CardsByCategoriesWithProgressiveLoading<
           to,
           categories,
           cardsByCategory,
-        });
-      });
-    });
+        })
+      })
+    })
   }
 
   public loadMoreCards(category: Category) {
     this.categories.mapOk((categories) => {
       this.cardsByCategory.mapOk((cardsByCategory) => {
-        const cards = cardsByCategory.get(category) ?? [];
+        const cards = cardsByCategory.get(category)
 
-        const offset = cards.findIndex((c) => c.isNotAsked());
+        cards.map((cards) => {
+          const offset = cards.findIndex((c) => c.isNotAsked())
 
-        if (offset === -1) {
-          return;
-        }
+          if (offset === -1) {
+            return
+          }
 
-        let limit = this.numberOfLoadMoreCards;
+          let limit = this.numberOfLoadMoreCards
 
-        if (offset + limit >= cards.length) {
-          limit = cards.length - offset;
-        }
+          if (offset + limit >= cards.length) {
+            limit = cards.length - offset
+          }
 
-        this.loadCardsForSpecifiedCategories({
-          categoriesToLoad: categories.filter(([name]) => name === category),
-          offset,
-          limit,
-          cardsByCategory,
-        });
-      });
-    });
+          this.loadCardsForSpecifiedCategories({
+            categoriesToLoad: categories.filter(([name]) => name === category),
+            offset,
+            limit,
+            cardsByCategory,
+          })
+        })
+      })
+    })
   }
 }
 
 function mergeValuesForLoading<Category, Card>(
-  current: AsyncResult<Map<Category, AsyncResult<Card>[]>>,
+  current: AsyncResult<MonadicMap<Category, AsyncResult<Card>[]>>,
   categoriesToLoad: WithCardinality<Category>[],
   offset: number,
   loadingCardsLength: number
-): AsyncResult<Map<Category, AsyncResult<Card>[]>> {
+): AsyncResult<MonadicMap<Category, AsyncResult<Card>[]>> {
   return current.mapOk((cardsByCategories) => {
-    const cardsByCategoriesWithLoading = new Map<Category, AsyncResult<Card>[]>(
-      cardsByCategories
-    );
+    const cardsByCategoriesWithLoading = new MonadicMap<
+      Category,
+      AsyncResult<Card>[]
+    >(cardsByCategories)
 
     categoriesToLoad.forEach(([category, cardinality]) => {
-      const categoryCards = cardsByCategoriesWithLoading.get(category) ?? [];
+      const categoryCards = cardsByCategoriesWithLoading.get(category)
 
-      const cardsBefore = categoryCards.slice(0, offset);
-      const loadingCards = Array(loadingCardsLength).fill(AsyncData.Loading());
-      const nonAskedCards = Array(
-        cardinality - loadingCardsLength - offset
-      ).fill(AsyncData.NotAsked());
+      categoryCards.map((categoryCards) => {
+        const cardsBefore = categoryCards.slice(0, offset)
+        const loadingCards = Array(loadingCardsLength).fill(AsyncData.Loading())
+        const nonAskedCards = Array(
+          cardinality - loadingCardsLength - offset
+        ).fill(AsyncData.NotAsked())
 
-      cardsByCategoriesWithLoading.set(category, [
-        ...cardsBefore,
-        ...loadingCards,
-        ...nonAskedCards,
-      ]);
-    });
+        cardsByCategoriesWithLoading.set(category, [
+          ...cardsBefore,
+          ...loadingCards,
+          ...nonAskedCards,
+        ])
+      })
+    })
 
-    return cardsByCategoriesWithLoading;
-  });
+    return cardsByCategoriesWithLoading
+  })
 }
 
 function mergeValuesWhenLoadDone<Category, Card>(
-  current: AsyncResult<Map<Category, AsyncResult<Card>[]>>,
-  loadedCardsByCategory: Map<Category, AsyncResult<Card>[]>,
+  current: AsyncResult<MonadicMap<Category, AsyncResult<Card>[]>>,
+  loadedCardsByCategory: MonadicMap<Category, AsyncResult<Card>[]>,
   from: number,
   to: number
-): AsyncResult<Map<Category, AsyncResult<Card>[]>> {
+): AsyncResult<MonadicMap<Category, AsyncResult<Card>[]>> {
   return current.mapOk((cardsByCategories) => {
-    const newValue = new Map<Category, AsyncResult<Card>[]>(cardsByCategories);
+    const newValue = new MonadicMap<Category, AsyncResult<Card>[]>(
+      cardsByCategories
+    )
     loadedCardsByCategory.forEach((cards, category) => {
-      const existingCards = cardsByCategories.get(category) ?? [];
+      const existingCards = cardsByCategories.get(category)
 
-      const cardsBefore = existingCards.slice(0, from);
-      const cardsAfter = existingCards.slice(to);
+      existingCards.map((existingCards) => {
+        const cardsBefore = existingCards.slice(0, from)
+        const cardsAfter = existingCards.slice(to)
 
-      const newCards = [...cardsBefore, ...cards, ...cardsAfter];
+        const newCards = [...cardsBefore, ...cards, ...cardsAfter]
 
-      newValue.set(category, newCards);
-    });
+        newValue.set(category, newCards)
+      })
+    })
 
-    return newValue;
-  });
+    return newValue
+  })
+}
+
+export class MonadicMap<Key, Value> implements Iterable<[Key, Value]> {
+  private readonly pairs: Record<string, Value> = {}
+
+  constructor(entries?: Iterable<[Key, Value]>) {
+    if (!entries) {
+      return
+    }
+
+    for (const [key, value] of entries) {
+      this.pairs[JSON.stringify(key)] = value
+    }
+  }
+
+  [Symbol.iterator](): Iterator<[Key, Value], any, undefined> {
+    return Object.entries(this.pairs)
+      .map(([key, value]) => [JSON.parse(key), value] as [Key, Value])
+      [Symbol.iterator]()
+  }
+
+  public get(key: Key): Option<Value> {
+    const maybeValue = this.pairs[JSON.stringify(key)]
+
+    return maybeValue ? Option.Some(maybeValue) : Option.None()
+  }
+
+  public set(key: Key, value: Value) {
+    this.pairs[JSON.stringify(key)] = value
+  }
+
+  public values(): Value[] {
+    return Object.values(this.pairs)
+  }
+
+  public forEach(callback: (value: Value, key: Key) => void) {
+    Object.entries(this.pairs).forEach(([key, value]) => {
+      callback(value, JSON.parse(key))
+    })
+  }
 }

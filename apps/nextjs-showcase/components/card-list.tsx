@@ -8,6 +8,7 @@ import {
   CardsByCategoriesWithProgressiveLoading,
   AsyncResult,
   WithCardinality,
+  MonadicMap,
 } from '@scaredfinger/cards-by-cats-vm';
 
 import React, {  } from 'react';
@@ -75,7 +76,7 @@ export const CardList = <Card, Category>({
   }
 
   function renderCardsByCategory(
-    cardsByCategory: Result<Map<Category, AsyncResult<Card>[]>, Error>,
+    cardsByCategory: Result<MonadicMap<Category, AsyncResult<Card>[]>, Error>,
     category: Category,
     cards: CardsByCategoriesWithProgressiveLoading<Card, Category>
   ): JSX.Element {
@@ -83,9 +84,9 @@ export const CardList = <Card, Category>({
       <ol>
         {cardsByCategory.match({
           Ok: (cardsByCategory) => {
-            const cardsInCategory = cardsByCategory.get(category);
-            if (cardsInCategory) {
-              return (
+            const maybeCardsInCategory = cardsByCategory.get(category);
+            return maybeCardsInCategory.match({
+              Some: (cardsInCategory) => (
                 <>
                   <button onClick={() => cards.loadMoreCategories()}>
                     Load more categories
@@ -97,10 +98,9 @@ export const CardList = <Card, Category>({
                     {renderCards(cardsInCategory)}
                   </div>
                 </>
-              );
-            } else {
-              return <>No cards in this category</>;
-            }
+              ),
+              None: () => <>No cards in this category</>
+            })
           },
           Error: (error) => <li>Error: {error.message}</li>,
         })}
