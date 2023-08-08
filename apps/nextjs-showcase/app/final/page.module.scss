@@ -4,21 +4,41 @@
     // scroll: auto;
     display: flex;
     gap: 10px;
+    margin-left: 0.15rem;
 }
 
 .card {
     width: 220px;
-    height: 340px;
+    height: 240px;
     border-radius: 10px;
-}   
+    margin: 0 0 1rem 0;
+    padding: 5px;
+    color: $dark_gray;
+
+    h3 {
+        margin: 0 0 0.5rem 0;
+        line-height: normal;
+    }
+
+    p {
+        font-size: 12px;
+        line-height: initial;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        margin-bottom: 0.5rem;
+    }
+}
 
 .cardsInCat .done {
-    background-color: $gray;
-    border: 2px solid $gray;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 5px -2px $dark_gray;
 }
 
 .cardsInCat .done:hover {
-    border: 2px solid $cyan;
+    border: 2px solid $light_gray;
 }
 
 .cardsInCat .notAsked {
@@ -36,48 +56,15 @@
 
 .cardImageList {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
+    gap: 0.5rem;
+    justify-content: flex-start;
+    overflow-x: auto;
 
-.cardImage {
-    margin: 0 auto;
-    height: 85px;
-    width: 90px;
-    object-fit: contain;
-    border-radius: 5px;
-    background-color: $blue;
-}
-
-.cardImageList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
-
-.cardImage {
-    margin: 0 auto;
-    height: 85px;
-    width: 85px;
-    object-fit: contain;
-}
-
-.card {
-    padding: 5px;
-    color: $cyan;
-}
-
-.card h2 {
-    font-size: 20px;
-    line-height: 22px;
-    height: 75px;
-    font-weight: bold;
-}
-
-.card p {
-    font-size: 12px;
-    line-height: 11px;
-    height: 60px;
+    .cardImage {
+        margin: 0 0 0.5rem 0;
+        height: 85px;
+        width: 90px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
 }
