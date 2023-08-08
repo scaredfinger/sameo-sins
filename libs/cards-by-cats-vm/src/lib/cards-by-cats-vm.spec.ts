@@ -58,6 +58,16 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
     })
   })
 
+  describe('default options', () => {
+    it('can be created with default values', () => {
+      const instance = new CardsByCategoriesWithProgressiveLoading<Card, Category>(
+        new TestState(),
+        loadCategories,
+        loadCardsByCategory
+      )
+    })
+  })
+
   it('can be created', () => {
     expect(sut).toBeTruthy()
   })
