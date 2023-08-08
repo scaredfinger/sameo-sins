@@ -13,7 +13,6 @@ import {
   State,
   SubmitChangesFunc,
 } from './cards-by-cats-vm';
-import exp from 'constants';
 
 describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () => {
   let pendingTasks: PendingTasks;
