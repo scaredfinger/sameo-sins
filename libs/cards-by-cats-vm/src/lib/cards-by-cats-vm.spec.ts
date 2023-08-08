@@ -12,7 +12,7 @@ import {
   ok,
   State,
   SubmitChangesFunc,
-  Map
+  MonadicMap,
 } from './cards-by-cats-vm'
 import { randomInt } from 'crypto'
 
@@ -20,10 +20,10 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
   let pendingTasks: PendingTasks
   let pendingLoadCategories: PendingTasks
   let pendingLoadCards: PendingTasks
-  let pendingLoadCardsCalls: Map<string, PendingTasks>
+  let pendingLoadCardsCalls: MonadicMap<string, PendingTasks>
 
   let loadingCategories: Signal
-  let loadingCards: Map<string, Signal>
+  let loadingCards: MonadicMap<string, Signal>
 
   let sut: CardsByCategoriesWithProgressiveLoading<Card, Category>
 
@@ -31,10 +31,10 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
     pendingTasks = new PendingTasks()
     pendingLoadCategories = new PendingTasks()
     pendingLoadCards = new PendingTasks()
-    pendingLoadCardsCalls = new Map<string, PendingTasks>()
+    pendingLoadCardsCalls = new MonadicMap<string, PendingTasks>()
 
     loadingCategories = new Signal()
-    loadingCards = new Map<string, Signal>()
+    loadingCards = new MonadicMap<string, Signal>()
 
     sut = new CardsByCategoriesWithProgressiveLoading<Card, Category>(
       new TestState(),
@@ -295,7 +295,13 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
         const nextCategories =
           FIRST_BATCH_OF_NON_PRELOADED_CATEGORIES_NAMES.map((category) =>
             sut.cardsByCategory.mapOk((cardsByCategory) =>
-              cardsByCategory.get(category)
+              cardsByCategory.get(category).match({
+                Some: (cardsByCategory) => cardsByCategory,
+                None: () => {
+                  fail('should not be none')
+                  return []
+                }
+              })
             )
           )
 
@@ -894,8 +900,12 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
     })
   }
 
-  function loadCategories(): Future<Result<WithCardinality<Category>[], Error>> {
-    async function loadCategoryAsPromise(): Promise<WithCardinality<Category>[]> {
+  function loadCategories(): Future<
+    Result<WithCardinality<Category>[], Error>
+  > {
+    async function loadCategoryAsPromise(): Promise<
+      WithCardinality<Category>[]
+    > {
       await loadingCategories.untilSignaled()
       return ALL_CATEGORIES
     }
@@ -925,11 +935,18 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
     limit: number
   ) {
     const key = renderLoadCardsKey(categories, offset, limit)
-    if (!loadingCards.has(key)) {
-      loadingCards.set(key, new Signal())
-    }
+    const signal = loadingCards.get(key)
+      .match({
+        Some: (signal) => signal,
+        None: () => {
+          const newSignal = new Signal()
+          loadingCards.set(key, newSignal)
 
-    return loadingCards.get(key)?.untilSignaled()
+          return newSignal
+        },
+      })
+
+    return signal.untilSignaled()
   }
 
   function addPendingLoadCards(
@@ -938,32 +955,35 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
     offset: number,
     limit: number
   ) {
-    const key = renderLoadCardsKey(categories, offset, limit)
     pendingLoadCards.add(promise)
     pendingTasks.add(promise)
+    
+    const key = renderLoadCardsKey(categories, offset, limit)
+    const callPendingTasks = pendingLoadCardsCalls.get(key).match({
+      Some: (call) => call,
+      None: () => {
+        const newPendingTasks = new PendingTasks()
+        pendingLoadCardsCalls.set(key, newPendingTasks)
 
-    if (!pendingLoadCardsCalls.has(key)) {
-      pendingLoadCardsCalls.set(key, new PendingTasks())
-    }
+        return newPendingTasks
+      }
+    })
 
-    pendingLoadCardsCalls.get(key)?.add(promise)
+    callPendingTasks.add(promise)
   }
 
-  async function untilDoneLoadingCards(
+  function untilDoneLoadingCards(
     categories: Category[],
     offset: number,
     limit: number
   ) {
     const key = renderLoadCardsKey(categories, offset, limit)
-
     const pendingTasks = pendingLoadCardsCalls.get(key)
 
-    if (!pendingTasks) {
-      await NEVER_ENDING_PROMISE
-      return
-    }
-
-    await pendingTasks.untilAllDone()
+    return pendingTasks.match({
+      Some: (p) => p.untilAllDone(),
+      None: () => NEVER_ENDING_PROMISE
+    })
   }
 
   function signalLoadCards(
@@ -972,11 +992,17 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
     limit: number
   ) {
     const key = renderLoadCardsKey(categories, offset, limit)
-    if (!loadingCards.has(key)) {
-      loadingCards.set(key, new Signal())
-    }
+    const signal = loadingCards.get(key).match({
+      Some: (signal) => signal,
+      None: () => {
+        const newSignal = new Signal()
+        loadingCards.set(key, newSignal)
 
-    loadingCards.get(key)?.signal()
+        return newSignal
+      }
+    })
+
+    signal.signal()
   }
 
   function signalLoadCategories() {
@@ -987,9 +1013,9 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
     categories: Category[],
     offset: number,
     limit: number
-  ): Future<Result<Map<Category, AsyncResult<Card>[]>, Error>> {
+  ): Future<Result<MonadicMap<Category, AsyncResult<Card>[]>, Error>> {
     async function loadCardsAsPromise(): Promise<
-      Map<Category, AsyncResult<Card>[]>
+      MonadicMap<Category, AsyncResult<Card>[]>
     > {
       await untilSignaledLoadingCards(categories, offset, limit)
 
@@ -1000,21 +1026,27 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
         cards.slice(offset, offset + limit).map((card) => ok(card)),
       ])
 
-      return new Map<Category, AsyncResult<Card>[]>(categoriesWithRequestedCards)
+      return new MonadicMap<Category, AsyncResult<Card>[]>(
+        categoriesWithRequestedCards
+      )
     }
 
     const promise = loadCardsAsPromise()
     addPendingLoadCards(promise, categories, offset, limit)
 
     return Future.fromPromise(promise) as Future<
-      Result<Map<Category, AsyncResult<Card>[]>, Error>
+      Result<MonadicMap<Category, AsyncResult<Card>[]>, Error>
     >
   }
 
   function getPreloadedCategories() {
     return PRELOADED_CATEGORIES_NAMES.map((category) =>
-      sut.cardsByCategory.mapOk(
-        (cardsByCategory) => cardsByCategory.get(category)!
+      sut.cardsByCategory.mapOk((cardsByCategory) =>
+        cardsByCategory.get(category).match({
+          Some: (cardsByCategory) => cardsByCategory,
+          // TODO: Fix this dirty hack
+          None: () => { throw Error() }
+        })
       )
     )
   }
@@ -1033,24 +1065,32 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
   function getIthBatchOfNonPreloadedCategories(i: number) {
     return getIthBatchOfNonPreloadedCategoriesNames(i).map((category) =>
       sut.cardsByCategory.mapOk(
-        (cardsByCategory) => cardsByCategory.get(category)!
+        (cardsByCategory) => cardsByCategory.get(category).match({
+          Some: (cardsByCategory) => cardsByCategory,
+          // TODO: Fix this dirty hack
+          None: () => { throw Error() }
+        })
       )
     )
   }
 
   function getPreloadCards(cardsByCategory: AsyncResult<Card>[]) {
-    return cardsByCategory?.slice(0, NUMBER_OF_CARDS_TO_PRELOAD)
+    return cardsByCategory.slice(0, NUMBER_OF_CARDS_TO_PRELOAD)
   }
 
   function getNonPreloadCards(cardsByCategory: AsyncResult<Card>[]) {
-    return cardsByCategory?.slice(NUMBER_OF_CARDS_TO_PRELOAD)
+    return cardsByCategory.slice(NUMBER_OF_CARDS_TO_PRELOAD)
   }
 
   function getNonPreloadedCategories() {
     return ALL_CATEGORIES.slice(NUMBER_OF_CATEGORIES_TO_PRELOAD).map(
       ([category]) =>
         sut.cardsByCategory.mapOk(
-          (cardsByCategory) => cardsByCategory.get(category)!
+          (cardsByCategory) => cardsByCategory.get(category).match({
+            Some: (cardsByCategory) => cardsByCategory,
+            // TODO: Fix this dirty hack
+            None: () => { throw Error() }
+          })
         )
     )
   }
@@ -1111,11 +1151,12 @@ class TestState implements State<Card, Category> {
   ): void {
     this.categories = applyChanges(this.categories)
   }
-  public cardsByCategory: AsyncResult<Map<Category, AsyncResult<Card>[]>> =
-    AsyncData.NotAsked()
+  public cardsByCategory: AsyncResult<
+    MonadicMap<Category, AsyncResult<Card>[]>
+  > = AsyncData.NotAsked()
   submitCardsByCategoryChanges(
     applyChanges: SubmitChangesFunc<
-      AsyncResult<Map<Category, AsyncResult<Card>[]>>
+      AsyncResult<MonadicMap<Category, AsyncResult<Card>[]>>
     >
   ): void {
     this.cardsByCategory = applyChanges(this.cardsByCategory)
@@ -1153,7 +1194,7 @@ const ALL_CATEGORIES: WithCardinality<Category>[] = Array(26)
       id: `category-${i}`,
       name: `category ${i}`,
     },
-    randomInt(20, 50)
+    randomInt(20, 50),
   ])
 
 function cardName(category: Category, i: number): string {
