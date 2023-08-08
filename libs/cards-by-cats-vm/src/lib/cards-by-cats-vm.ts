@@ -273,3 +273,46 @@ function mergeValuesWhenLoadDone<Category, Card>(
     return newValue
   })
 }
+
+export class Map<Key, Value> implements Iterable<[Key, Value]> {
+  private readonly pairs: Record<string, Value> = {}
+
+  constructor(entries?: Iterable<[Key, Value]>) {
+    if (!entries) {
+      return
+    }
+
+    for (const [key, value] of entries) {
+      this.pairs[JSON.stringify(key)] = value
+    }
+  }
+
+  [Symbol.iterator](): Iterator<[Key, Value], any, undefined> {
+    return Object.entries(this.pairs).map(([key, value]) => [
+      JSON.parse(key),
+      value,
+    ] as [Key, Value])[Symbol.iterator]()
+  }
+
+  public get(key: Key): Value | undefined {
+    return this.pairs[JSON.stringify(key)]
+  }
+
+  public set(key: Key, value: Value) {
+    this.pairs[JSON.stringify(key)] = value
+  }
+
+  public values(): Value[] {
+    return Object.values(this.pairs)
+  }
+
+  public forEach(callback: (value: Value, key: Key) => void) {
+    Object.entries(this.pairs).forEach(([key, value]) => {
+      callback(value, JSON.parse(key))
+    })
+  }
+
+  public has(key: Key): boolean {
+    return JSON.stringify(key) in this.pairs
+  }
+}

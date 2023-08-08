@@ -12,6 +12,7 @@ import {
   ok,
   State,
   SubmitChangesFunc,
+  Map
 } from './cards-by-cats-vm'
 import { randomInt } from 'crypto'
 

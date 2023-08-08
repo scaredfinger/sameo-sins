@@ -2,14 +2,14 @@
 
 import { useEffect } from 'react';
 
-import { loadCategories, loadCardsByCategory, Trip } from '../with-actual-data/api'
 import { useCardsByCategoriesState } from '../../components/use-cards-by-categories-state';
 import { CardList } from 'apps/nextjs-showcase/components/card-list';
 
 import styles from './page.module.scss';
+import { Trip, TripCollection, loadCardsByCategory, loadCategories } from './api';
 
 export default function Index() {
-  const viewState = useCardsByCategoriesState<Trip, string>({
+  const viewState = useCardsByCategoriesState<Trip, TripCollection>({
     loadCategories,
     loadCardsByCategory,
     numberOfCategoriesToPreload: 2,
