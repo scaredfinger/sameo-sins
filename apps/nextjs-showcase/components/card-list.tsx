@@ -13,6 +13,11 @@ import {
 
 import React, {  } from 'react';
 
+interface BaseCategory {
+  id: string;
+  name: string;
+}
+
 interface Props<Card, Category> {
   styles: {
     [key: string]: string;
@@ -21,7 +26,7 @@ interface Props<Card, Category> {
   renderCard?: (card: Card, index: number) => JSX.Element;
 }
 
-export const CardList = <Card, Category>({
+export const CardList = <Card, Category extends BaseCategory>({
   styles,
   viewModel,
   renderCard
@@ -54,10 +59,10 @@ export const CardList = <Card, Category>({
         </button>
         <ol id="categories-list">
           {categories.map(([category, cardinality]) => (
-            <li className="category-cards" key={JSON.stringify(category)}>
+            <li className="category-cards" key={category.id}>
               <article>
                 <h2>
-                  {JSON.stringify(category)} ({cardinality})
+                  {category.name} ({cardinality})
                 </h2>
                 <>
                   {cards.cardsByCategory.match({
