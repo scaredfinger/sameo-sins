@@ -29,15 +29,6 @@ pre {
   border-style: solid;
   border-color: currentColor;
 }
-h1,
-h2 {
-  font-size: inherit;
-  font-weight: inherit;
-}
-a {
-  color: inherit;
-  text-decoration: inherit;
-}
 pre {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     Liberation Mono, Courier New, monospace;
@@ -62,4 +53,25 @@ ul {
   padding: 0;
   margin: 0;
   list-style: none;
+}
+
+button {
+  position: relative;
+  margin: 0 0.5rem 1rem 0;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  outline: none;
+  cursor: pointer;
+  background: $light_gray;
+  transition: 0.6s;
+
+  &:hover {
+    background: $gray;
+    color: #fff;
+  }
+}
+
+.back {
+  display: block;
+  padding: 0 0 1rem 0;
 }

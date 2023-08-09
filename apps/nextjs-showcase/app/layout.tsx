@@ -1,4 +1,5 @@
 import './global.scss';
+import Link from "next/link";
 
 export const metadata = {
   title: 'Welcome to nextjs-showcase',
