@@ -36,13 +36,13 @@ export default function Index() {
       <CardList
         viewModel={viewState}
         styles={styles}
-        renderCard={renderCards}
+        renderCard={renderCard}
       />
     </>
   )
 }
 
-function renderCards(card: Trip) {
+function renderCard(card: Trip) {
   return (
     <div className={`${styles.card} ${styles.done}`}>
       <h3>{card.headline}</h3>
