@@ -323,4 +323,10 @@ export class MonadicMap<Key, Value> implements Iterable<[Key, Value]> {
       callback(value, JSON.parse(key))
     })
   }
+
+  public map<T>(callback: (value: Value, key: Key) => T): T[] {
+    return Object.entries(this.pairs).map(([key, value]) =>
+      callback(value, JSON.parse(key))
+    )
+  }
 }
