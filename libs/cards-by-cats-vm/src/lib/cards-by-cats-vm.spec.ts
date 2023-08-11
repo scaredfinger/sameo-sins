@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { AsyncData, Future, Result } from '@swan-io/boxed'
-
+import { randomInt } from 'crypto'
 import _ from 'lodash'
 
 import { PendingTasks, Signal } from './tests-helpers'
@@ -14,7 +14,6 @@ import {
   SubmitChangesFunc,
   MonadicMap,
 } from './cards-by-cats-vm'
-import { randomInt } from 'crypto'
 
 describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () => {
   let pendingTasks: PendingTasks
@@ -864,6 +863,36 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
 
       await untilNoMorePendingTasks()
     })
+  })
+
+  describe('edge cases', () => {
+
+    describe('when then number of cards in a cat is less than the preload number of cards', () => {
+
+      beforeEach(async () => {
+        sut = new CardsByCategoriesWithProgressiveLoading<Card, Category>(
+          new TestState(),
+          loadCategories,
+          loadCardsByCategory,
+          {
+            numberOfCategoriesToPreload: NUMBER_OF_CATEGORIES_TO_PRELOAD,
+            numberOfCardsToPreload: NUMBER_OF_CARDS_TO_PRELOAD * 1_000_000,
+            numberOfLoadMoreCategories: NUMBER_OF_LOAD_MORE_CATEGORIES,
+            numberOfLoadMoreCards: NUMBER_OF_LOAD_MORE_CARDS,
+          }
+        )
+
+        sut.preload()
+        signalLoadCategories()
+      })
+
+      it('returns done for cards in preload categories', async () => {
+        expect(sut.cardsByCategory.isDone()).toBeTruthy()
+      })
+
+    })
+
+
   })
 
   async function untilNoMorePendingTasks(): Promise<void> {

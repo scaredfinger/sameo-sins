@@ -241,10 +241,12 @@ function mergeValuesForLoading<Category, Card>(
 
       categoryCards.map((categoryCards) => {
         const cardsBefore = categoryCards.slice(0, offset)
-        const loadingCards = Array(loadingCardsLength).fill(AsyncData.Loading())
-        const nonAskedCards = Array(
-          cardinality - loadingCardsLength - offset
-        ).fill(AsyncData.NotAsked())
+        const sanitizedLoadingCardsLength = Math.min(cardinality, loadingCardsLength)
+        const loadingCards = Array(sanitizedLoadingCardsLength).fill(AsyncData.Loading())
+        const numberOfNonAskedCards = cardinality - sanitizedLoadingCardsLength - offset
+        const nonAskedCards = Array(numberOfNonAskedCards).fill(
+          AsyncData.NotAsked()
+        )
 
         cardsByCategoriesWithLoading.set(category, [
           ...cardsBefore,
