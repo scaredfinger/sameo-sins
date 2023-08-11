@@ -26,7 +26,7 @@ export interface TripCollection {
 export interface Trip {
   id: string
   headline: string
-  salesPitch: string
+  salesPitch: any
   images: string[]
 }
 
