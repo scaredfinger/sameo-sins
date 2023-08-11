@@ -892,7 +892,6 @@ describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () =>
 
     })
 
-
   })
 
   async function untilNoMorePendingTasks(): Promise<void> {
