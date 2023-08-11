@@ -6,6 +6,7 @@ import {
   AsyncFunc,
   AsyncResult,
   CardsByCategoriesWithProgressiveLoading,
+  MonadicMap,
   State,
   WithCardinality,
 } from '@scaredfinger/cards-by-cats-vm';
@@ -18,7 +19,7 @@ interface Options<Card, Category> {
     categories: Category[],
     offset: number,
     limit: number
-  ) => Future<Result<Map<Category, AsyncResult<Card>[]>, Error>>
+  ) => Future<Result<MonadicMap<Category, AsyncResult<Card>[]>, Error>>
   numberOfCategoriesToPreload?: number;
   numberOfCardsToPreload?: number;
   numberOfLoadMoreCards?: number;
@@ -42,7 +43,7 @@ export function useCardsByCategoriesState<
     AsyncResult<CategoryWithCardinality[]>
   >(AsyncData.NotAsked());
   const [cardsByCategory, setCardsByCategory] = useState<
-    AsyncResult<Map<Category, AsyncResult<Card>[]>>
+    AsyncResult<MonadicMap<Category, AsyncResult<Card>[]>>
   >(AsyncData.NotAsked());
 
   const state = useMemo(

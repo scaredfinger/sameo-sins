@@ -126,7 +126,10 @@ export const CardList = <Card, Category extends BaseCategory>({
               Done: (cardOrError) => (
                 <>
                   {cardOrError.match({
-                    Ok: (card) => sanitizedRenderCard(card, i),
+                    Ok: (card) => (
+                      <div key={i}>
+                        { sanitizedRenderCard(card, i) }
+                      </div>),
                     Error: (error) => (
                       <div className={`${styles.card} ${styles.error}`}>
                         {error.message}

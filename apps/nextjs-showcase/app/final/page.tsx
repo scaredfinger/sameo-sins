@@ -11,6 +11,8 @@ import {
 import { useCardsByCategoriesState } from '../../components/use-cards-by-categories-state'
 import { CardList } from '../../components/card-list'
 
+import { PortableText } from '@portabletext/react'
+
 import styles from './page.module.scss'
 import Link from 'next/link'
 
@@ -36,17 +38,17 @@ export default function Index() {
       <CardList
         viewModel={viewState}
         styles={styles}
-        renderCard={renderCards}
+        renderCard={renderCard}
       />
     </>
   )
 }
 
-function renderCards(card: Trip) {
+function renderCard(card: Trip) {
   return (
     <div className={`${styles.card} ${styles.done}`}>
       <h3>{card.headline}</h3>
-      <p>{card.salesPitch}</p>
+      <PortableText value={card.salesPitch} />
       <div className={styles.cardImageList}>
         {card.images.map((image, i) => (
           <img key={i} src={image} className={styles.cardImage} />
