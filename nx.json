@@ -48,6 +48,12 @@
         "style": "scss",
         "linter": "eslint"
       }
+    },
+    "@nx/web:application": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "none",
+      "e2eTestRunner": "none"
     }
   }
 }
