@@ -7,7 +7,6 @@ import {
   AsyncResult,
   CardsByCategoriesWithProgressiveLoading,
   MonadicMap,
-  State,
   WithCardinality,
 } from '@scaredfinger/cards-by-cats-vm';
 
