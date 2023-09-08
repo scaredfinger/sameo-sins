@@ -16,7 +16,9 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
   },
   "include": ["src"],
   "references": [

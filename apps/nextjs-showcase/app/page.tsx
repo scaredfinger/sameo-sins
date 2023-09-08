@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import styles from './page.module.scss';
+import Link from 'next/link'
+import styles from './page.module.scss'
 
 export default async function Index() {
   /*
@@ -15,13 +15,10 @@ export default async function Index() {
         <li>
           <Link href="/with-dummy-data">With dummy data</Link>
         </li>
-          <li>
-              <Link href="/with-actual-data">With actual data</Link>
-          </li>
-          <li>
-              <Link href="/final">Final</Link>
-          </li>
+        <li>
+          <Link href="/final">Final</Link>
+        </li>
       </ul>
     </div>
-  );
+  )
 }
