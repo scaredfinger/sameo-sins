@@ -3,6 +3,7 @@
 </style>
 <script setup lang="ts">
 import { useTripsAndTripsCollectionsViewModel } from './api/state'
+import { TripCollection } from './api/trips-and-collections'
 import { Card } from './components/card'
 
 const styles: any = {
@@ -17,18 +18,58 @@ const styles: any = {
 }
 const viewModel = useTripsAndTripsCollectionsViewModel()
 viewModel.preload()
+
+function areCategoriesDoneDownloading() {
+  return viewModel.categories.isDone()
+}
+
+function areCategoriesOk() {
+  return viewModel.categories.match({
+    Done: (categories) => categories.isOk(),
+    NotAsked: () => false,
+    Loading: () => false,
+  })
+}
+
+function getCategories() {
+  return viewModel.categories.match({
+    Done: (categories) => categories.match({
+      Ok: (okCategories) => okCategories,
+      Error: () => [],
+    }),
+    NotAsked: () => [],
+    Loading: () => [],
+  })
+}
+
+function areCardsReady() {
+  return viewModel.categories.isDone() && viewModel.cardsByCategory.isDone()
+}
+
+function getCategoryCards(tripCollection: TripCollection) {
+  return viewModel.cardsByCategory.match({
+    Done: (cardsByCategory) => cardsByCategory.match({
+      Ok: (okCardsByCategory) => okCardsByCategory.get(tripCollection).match({
+        Some: (cards) => cards,
+        None: () => [],
+      }),
+      Error: () => [],
+    }),
+    NotAsked: () => [],
+    Loading: () => [],
+  })
+}
 </script>
 <template>
-  <div v-if="viewModel.categories.isDone()">
-    <div v-if="viewModel.categories.value.isError()">Error</div>
-    <div v-if="viewModel.categories.value.isOk()">
+  <div v-if="areCategoriesDoneDownloading()">
+    <div v-if="areCategoriesOk()">
       <button @click="() => viewModel.loadMoreCategories()">
         Load more categories
       </button>
       <ol id="categories-list">
         <li
           class="category-cards"
-          v-for="[category, cardinality] in viewModel.categories.value.value"
+          v-for="[category, cardinality] in getCategories()"
           :key="category.id"
         >
           <article>
@@ -43,16 +84,9 @@ viewModel.preload()
             <ol
               class="cardsInCat"
               style="display: flex; overflow: auto;"
-              v-if="
-                viewModel.cardsByCategory.isDone() &&
-                viewModel.cardsByCategory.value.isOk() &&
-                viewModel.cardsByCategory.value.value.get(category).isSome()
-              "
-            >
+              v-if="areCardsReady()">
               <li
-                v-for="card in viewModel.cardsByCategory.value.value
-                  .get(category)
-                  .getWithDefault([])"
+                v-for="card in getCategoryCards(category)"
                 :key="card.mapOk((trip) => trip.id)"
               >
                 <Card 
@@ -67,6 +101,7 @@ viewModel.preload()
         </li>
       </ol>
     </div>
+    <div v-else>Error</div>
   </div>
   <div v-else>Loading...</div>
 </template>
