@@ -1,8 +1,20 @@
+<style lang="scss">
+  @import "./styles.scss";
+</style>
 <script setup lang="ts">
 import { useTripsAndTripsCollectionsViewModel } from './api/state'
 import { Card } from './components/card'
 
-const styles: any = {}
+const styles: any = {
+  card: 'card',
+  cardfInCat: 'cardsInCat',
+  done: 'done',
+  error: 'error',
+  notAsked: 'notAsked',
+  loading: 'loading',
+  cardImageList: 'cardImageList',
+  cardImage: 'cardImage',
+}
 const viewModel = useTripsAndTripsCollectionsViewModel()
 viewModel.preload()
 </script>
@@ -10,7 +22,7 @@ viewModel.preload()
   <div v-if="viewModel.categories.isDone()">
     <div v-if="viewModel.categories.value.isError()">Error</div>
     <div v-if="viewModel.categories.value.isOk()">
-      <button @click="viewModel.loadMoreCategories()">
+      <button @click="() => viewModel.loadMoreCategories()">
         Load more categories
       </button>
       <ol id="categories-list">
@@ -21,34 +33,34 @@ viewModel.preload()
         >
           <article>
             <h2>{{ category.name }} ({{ cardinality }})</h2>
-            <button @click="viewModel.loadMoreCategories()">
+            <button @click="() => viewModel.loadMoreCategories()">
               Load more categories
             </button>
-            <button @click="viewModel.loadMoreCards(category)">
+            <button @click="() => viewModel.loadMoreCards(category)">
               Load more cards
             </button>
 
-            <div style="{ flex: 1, display: 'flex', overflow: 'auto' }">
-              <ol
-                v-if="
-                  viewModel.cardsByCategory.isDone() &&
-                  viewModel.cardsByCategory.value.isOk() &&
-                  viewModel.cardsByCategory.value.value.get(category).isSome()
-                "
+            <ol
+              class="cardsInCat"
+              style="display: flex; overflow: auto;"
+              v-if="
+                viewModel.cardsByCategory.isDone() &&
+                viewModel.cardsByCategory.value.isOk() &&
+                viewModel.cardsByCategory.value.value.get(category).isSome()
+              "
+            >
+              <li
+                v-for="card in viewModel.cardsByCategory.value.value
+                  .get(category)
+                  .getWithDefault([])"
+                :key="card.mapOk((trip) => trip.id)"
               >
-                <li
-                  v-for="card in viewModel.cardsByCategory.value.value
-                    .get(category)
-                    .getWithDefault([])"
-                  :key="card.mapOk((trip) => trip.id)"
-                >
-                  <Card 
-                    :card="card"
-                    :styles="styles"
-                  />
-                </li>
-              </ol>
-            </div>
+                <Card 
+                  :card="card"
+                  :styles="styles"
+                />
+              </li>
+            </ol>
           </article>
 
           <div></div>

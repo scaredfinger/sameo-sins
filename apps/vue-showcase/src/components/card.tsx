@@ -2,6 +2,7 @@ import { AsyncResult } from "@scaredfinger/cards-by-cats-vm"
 
 import { Trip } from "../api/trips-and-collections"
 import { h } from "vue"
+import { PortableText } from '@portabletext/vue'
 
 interface WtihStyles {
   styles: { [key: string]: string }
@@ -13,27 +14,19 @@ interface Props extends WtihStyles {
 
 export const Card = ({ card, styles }: Props) => {
 
-  /**
-  <div className={`${styles.card} ${styles.done}`}>
-    <h3>{card.headline}</h3>
-    <PortableText value={card.salesPitch} />
-    <div className={styles.cardImageList}>
-      {card.images.map((image, i) => (
-        <img key={i} src={image} className={styles.cardImage} />
-      ))}
-    </div>
-  </div>
-   * 
-   */
-
   return card.match({
     Done: (done) => done.match({
-      Ok: (okCard) => h('div', [
+      Ok: (okCard) => h('div', {
+        class: `${styles.card} ${styles.done}`
+      }, [
         h('h3', {}, okCard.headline),
-        h('div', {}, okCard.salesPitch),
-        h('div', {}, okCard.images.map((image, i) => h('img', {
+        renderPortableText(okCard.salesPitch),
+        h('div', {
+          class: styles.cardImageList
+        }, okCard.images.map((image, i) => h('img', {
           key: i,
-          src: image
+          src: image,
+          class: styles.cardImage
         })))
       ]),
       Error: (error) => renderError({ error })
@@ -41,6 +34,14 @@ export const Card = ({ card, styles }: Props) => {
     Loading: () => renderLoading({ styles }),
     NotAsked: () => renderNotAsked({ styles }),
   })
+}
+
+function renderPortableText(value: any) {
+  return (
+    <PortableText
+      value={value}
+    />
+  )
 }
 
 function renderNotAsked({ styles }: WtihStyles) {

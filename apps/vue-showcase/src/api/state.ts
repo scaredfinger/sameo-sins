@@ -44,10 +44,10 @@ export function useState<Card, Category>(
   {
     loadCategories,
     loadCardsByCategory,
-    numberOfCategoriesToPreload = 3,
-    numberOfCardsToPreload = 5,
+    numberOfCategoriesToPreload = 2,
+    numberOfCardsToPreload = 4,
     numberOfLoadMoreCategories = 1,
-    numberOfLoadMoreCards = 5,
+    numberOfLoadMoreCards = 2,
   }: Options<Card, Category>
 ) {
 

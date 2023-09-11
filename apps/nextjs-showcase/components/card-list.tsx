@@ -86,7 +86,7 @@ export const CardList = <Card, Category extends BaseCategory>({
     cards: CardsByCategoriesWithProgressiveLoading<Card, Category>
   ): JSX.Element {
     return (
-      <ol>
+      <>
         {cardsByCategory.match({
           Ok: (cardsByCategory) => {
             const maybeCardsInCategory = cardsByCategory.get(category);
@@ -109,7 +109,7 @@ export const CardList = <Card, Category extends BaseCategory>({
           },
           Error: (error) => <li>Error: {error.message}</li>,
         })}
-      </ol>
+      </>
     );
   }
 

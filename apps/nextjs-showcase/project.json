@@ -23,7 +23,8 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "nextjs-showcase:build",
-        "dev": true
+        "dev": true,
+        "port": 4300
       },
       "configurations": {
         "development": {
