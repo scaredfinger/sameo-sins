@@ -12,8 +12,8 @@ import {
   ok,
   State,
   SubmitChangesFunc,
-  MonadicMap,
 } from './cards-by-cats-vm'
+import { MonadicMap } from './monadic-map'
 
 describe('class `CardsByCategoriesWithProgressiveLoading<Card,Category>`', () => {
   let pendingTasks: PendingTasks

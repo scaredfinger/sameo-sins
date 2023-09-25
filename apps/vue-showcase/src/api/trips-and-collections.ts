@@ -141,7 +141,7 @@ export function loadCardsByCategory(
 ): Future<Result<MonadicMap<TripCollection, AsyncResult<Trip>[]>, Error>> {
   const fetchPromise = loadCardsByCategoryAsync(categories, offset, limit)
     .then(response => new MonadicMap<TripCollection, AsyncResult<Trip>[]>(
-      response.map<[TripCollection, AsyncResult<Trip>[]]>(
+      response.mapValues<[TripCollection, AsyncResult<Trip>[]]>(
         (value, key) => [
           key, 
           value.map(v => ok(v))
