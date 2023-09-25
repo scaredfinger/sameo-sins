@@ -138,7 +138,6 @@ export class CardsByCategoriesWithProgressiveLoading<
     categoriesToLoad,
     offset = 0,
     limit = this.numberOfCardsToPreload,
-    cardsByCategory,
   }: {
     categoriesToLoad: WithCardinality<Category>[]
     offset?: number
